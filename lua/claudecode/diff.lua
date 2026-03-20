@@ -219,6 +219,7 @@ local function display_terminal_in_new_tab()
   if not terminal_bufnr or not vim.api.nvim_buf_is_valid(terminal_bufnr) then
     vim.cmd("tabnew")
     local new_tab = vim.api.nvim_get_current_tabpage()
+    pcall(vim.api.nvim_buf_set_option, vim.api.nvim_get_current_buf(), "bufhidden", "wipe")
     return original_tab, nil, false, new_tab
   end
 
@@ -1014,7 +1015,7 @@ function M._cleanup_diff_state(tab_name, reason)
     if diff_data.new_tab_number and vim.api.nvim_tabpage_is_valid(diff_data.new_tab_number) then
       -- Prefer closing by switching to the new tab then executing :tabclose
       pcall(vim.api.nvim_set_current_tabpage, diff_data.new_tab_number)
-      pcall(vim.cmd, "tabclose")
+      pcall(vim.cmd, "tabclose!")
       -- Restore original tab focus if still valid
       if diff_data.original_tab_number and vim.api.nvim_tabpage_is_valid(diff_data.original_tab_number) then
         pcall(vim.api.nvim_set_current_tabpage, diff_data.original_tab_number)
@@ -1023,7 +1024,7 @@ function M._cleanup_diff_state(tab_name, reason)
       -- Fallback: close the previously current tab if it's still around and not the original
       local current_tab = vim.api.nvim_get_current_tabpage()
       if vim.api.nvim_tabpage_is_valid(current_tab) and current_tab ~= diff_data.original_tab_number then
-        pcall(vim.cmd, "tabclose " .. vim.api.nvim_tabpage_get_number(current_tab))
+        pcall(vim.cmd, "tabclose! " .. vim.api.nvim_tabpage_get_number(current_tab))
       end
     end
 
